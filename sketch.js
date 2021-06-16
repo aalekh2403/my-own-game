@@ -1,0 +1,227 @@
+var sprite
+var Background
+var rocket
+var missile_image
+
+var missileGroup
+var invisibleWall1
+var invisibleWall2
+
+var space_img
+var rocket_img
+var enemy_img
+var enemyGroup
+var score 
+var gameEnded
+
+var Reset
+var reset_img
+var START=1
+var PLAY=2
+var END=0
+var gameState=START
+var gameend
+var gameend_img
+
+var StartImg
+var start
+function preload()
+{
+	space_img=loadImage("space.jpg");
+  rocket_img=loadImage("rocket.png");
+  enemy_img=loadImage("enemy.png");
+  missile_image=loadImage("missile2.png")
+  gameEnded=loadImage("gameOver.png")
+  gameend_img=loadImage("gameOver.png");
+  reset_img=loadImage("reset.png")
+  StartImg=loadImage("start.png")
+}
+
+function setup() {
+	createCanvas(1000, 600);
+
+
+	//Create the Bodies Here.
+
+var canvas =createCanvas(1000,549)
+   Background=createSprite(500,340,2500,2200)
+   Background.scale=0.3;
+   Background.shapeColor="red";
+   Background.velocityY=-2
+   Background.addImage(space_img)
+   Background.scale=1.2
+
+   rocket=createSprite(500,485,20,20)
+   rocket.addImage(rocket_img);
+   rocket.scale=0.1
+   
+   missileGroup=new Group();
+   enemyGroup=new Group();
+
+   invisibleWall1=createSprite(120,275,10,548)
+   invisibleWall1.shapeColor="black";
+   invisibleWall1.visible=false;
+   invisibleWall2=createSprite(880,275,10,548)
+   invisibleWall2.shapeColor="black"
+   invisibleWall2.visible=false;
+
+   gameend=createSprite(460,260,200,200)
+   gameend.addImage(gameend_img)
+   gameend.scale=1.5
+   
+   score=0
+
+   start=createSprite(500,320,50,50)
+   start.addImage(StartImg)
+   start.scale=0.8
+   start.visible=false;
+   
+Reset=createSprite(870,450)
+Reset.addImage(reset_img)
+Reset.scale=0.2
+Reset.visible=true; 
+
+
+  
+}
+
+
+function draw() {
+
+  background(0);
+
+  if(gameState===START){
+    Reset.visible=false
+    gameend.visible=false
+    Background.velocityY=0;
+    rocket.visible=true;
+    rocket.velocityX=0;
+    start.visible=true;
+
+
+
+if(keyDown("SPACE"))
+{
+  gameState=PLAY;
+  background(StartImg)
+}
+  }
+  
+
+if(gameState===PLAY){
+
+  Reset.visible=false
+  gameend.visible=false
+  Background.velocityY=-2
+  start.visible=false
+  if(Background.y<220){
+    Background.y=300;
+
+}
+
+if(keyDown("LEFT_ARROW")){
+  rocket.velocityX=-4;
+  }
+  
+if(keyDown("RIGHT_ARROW")){
+  rocket.velocityX=4;
+  }
+ 
+  if(keyDown("UP_ARROW")){
+    spawnMissile();
+    }
+
+    if(rocket.isTouching(invisibleWall1)){
+      rocket.velocityX=4
+    }
+    
+    if(rocket.isTouching(invisibleWall2)){
+      rocket.velocityX=-4
+    }
+   if(enemyGroup.isTouching(missileGroup)){
+     console.log("helooooo")
+     enemyGroup.destroyEach();
+     missileGroup.destroyEach();
+     score=score+1;
+    }
+    
+    if(enemyGroup.isTouching(rocket))
+    {
+     gameState=END
+    
+    }
+    spawnEnemies()
+  }
+
+
+if(gameState===END){
+  rocket.x=500;
+  rocket.y=480;
+  enemyGroup.destroyEach();
+  background.velocityX=0
+  fill("red") 
+  text("GAME OVER",400,400)
+  gameend.visible=true
+  Reset.visible=true
+    
+    
+if(mousePressedOver(Reset)) {
+  reset();
+}
+
+
+}
+
+
+
+
+  drawSprites();
+  strokeWeight(2)
+  stroke("pink")
+  fill("blue");
+textSize(25)
+text("Score = "+score,40,80)
+
+ 
+ 
+}
+
+function spawnEnemies(){
+  if(frameCount % 100===0){
+   var enemy = createSprite(Math.round(random(150,800)),150,30,30);
+   enemy.velocityY=2;
+   enemy.addImage(enemy_img)
+   enemy.scale=0.15;  
+   enemy.debug=false
+   enemy.setCollider("rectangle",0,0,50,enemy.height)
+   enemyGroup.add(enemy)
+
+  }
+ }
+
+ function spawnMissile()
+ {
+   if(frameCount%4===0){
+  var missile=createSprite(100,450,20,20)
+  missile.x=rocket.x
+  missile.velocityY=-4;
+  missile.lifetime=220;
+  missile.addImage(missile_image)
+  missile.scale=0.1
+  missileGroup.add(missile);
+  return missile;
+   } 
+}
+
+
+
+function reset(){
+  gameState = PLAY;
+  gameend.visible = false;
+  Reset.visible = false;
+  enemyGroup.destroyEach();
+  missileGroup.destroyEach();
+  
+  score = 0;
+  
+}
